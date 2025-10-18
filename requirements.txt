@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+psycopg2-binary
+pandas
+scikit-learn
+torch
+transformers
+mlflow
+dvc
+minio
+python-dotenv
+prometheus-client

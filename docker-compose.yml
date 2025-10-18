@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: med_postgres
+    environment:
+      POSTGRES_USER: meduser
+      POSTGRES_PASSWORD: medpass123
+      POSTGRES_DB: medical_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - mednet
+
+  minio:
+    image: minio/minio:latest
+    container_name: med_minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"      # S3 API
+      - "9001:9001"      # MinIO web console
+    volumes:
+      - miniodata:/data
+    restart: unless-stopped
+    networks:
+      - mednet
+
+networks:
+  mednet:
+
+volumes:
+  pgdata:
+  miniodata:
