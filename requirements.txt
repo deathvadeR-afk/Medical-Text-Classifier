@@ -1,14 +1,41 @@
+# Core API dependencies
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
+
+# Database
 sqlalchemy
 psycopg2-binary
-pandas
+
+# Data processing
 scikit-learn
+
+# Machine Learning
 torch
 transformers
-mlflow
-dvc
+
+# Object Storage (optional)
 minio
+
+# Configuration
 python-dotenv
+
+# Monitoring
 prometheus-client
+
+# Utilities
+joblib
+requests
+
+# Security
+slowapi  # Rate limiting
+python-jose[cryptography]  # JWT tokens
+passlib[bcrypt]  # Password hashing
+python-multipart  # Form data parsing
+cryptography  # Encryption utilities
+
+# Testing
+pytest
+pytest-asyncio
+
+

@@ -1,0 +1,142 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: medtext-ingress
+  namespace: medtext
+  labels:
+    app: medical-text-classification
+    component: ingress
+  annotations:
+    # Nginx Ingress Controller annotations
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.yourdomain.com;" always;
+    
+    # CORS configuration
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://yourdomain.com,https://www.yourdomain.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization, X-API-Key"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "X-RateLimit-Remaining, X-RateLimit-Reset"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    
+    # Certificate management (cert-manager)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/acme-challenge-type: "http01"
+spec:
+  tls:
+  - hosts:
+    - yourdomain.com
+    - www.yourdomain.com
+    - api.yourdomain.com
+    - monitoring.yourdomain.com
+    secretName: tls-secret
+  rules:
+  # Main frontend
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  
+  # WWW redirect
+  - host: www.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  
+  # API subdomain
+  - host: api.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-service
+            port:
+              number: 8000
+  
+  # Monitoring subdomain
+  - host: monitoring.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana-service
+            port:
+              number: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: medtext-network-policy
+  namespace: medtext
+  labels:
+    app: medical-text-classification
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from nginx ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  # Allow internal communication
+  - from:
+    - podSelector:
+        matchLabels:
+          app: medical-text-classification
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow HTTPS outbound (for external APIs, model downloads, etc.)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow internal communication
+  - to:
+    - podSelector:
+        matchLabels:
+          app: medical-text-classification
+  # Allow database access
+  - to:
+    - podSelector:
+        matchLabels:
+          component: database
+    ports:
+    - protocol: TCP
+      port: 5432

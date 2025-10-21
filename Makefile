@@ -45,6 +45,22 @@ format:
 .PHONY: test
 test:
 	python -m pytest tests
+
+## Run unit tests
+.PHONY: test-unit
+test-unit:
+	python run_tests.py --unit
+
+## Run integration tests
+.PHONY: test-integration
+test-integration:
+	python run_tests.py --integration
+
+## Run all tests with coverage
+.PHONY: test-all
+test-all:
+	python run_tests.py --all --coverage --html
+
 ## Download Data from storage system
 .PHONY: sync_data_down
 sync_data_down:
@@ -80,6 +96,79 @@ create_environment:
 data: requirements
 	$(PYTHON_INTERPRETER) src/dataset.py
 
+#################################################################################
+# DOCKER COMMANDS                                                               #
+#################################################################################
+
+## Build Docker image
+.PHONY: docker-build
+docker-build:
+	docker build -t medical-text-classifier:latest .
+
+## Run Docker container
+.PHONY: docker-run
+docker-run:
+	docker run -d \
+		--name medical-api \
+		-p 8000:8000 \
+		-e DATABASE_URL=${DATABASE_URL} \
+		medical-text-classifier:latest
+
+## Stop Docker container
+.PHONY: docker-stop
+docker-stop:
+	docker stop medical-api || true
+	docker rm medical-api || true
+
+## View Docker logs
+.PHONY: docker-logs
+docker-logs:
+	docker logs -f medical-api
+
+## Start services with docker-compose
+.PHONY: docker-up
+docker-up:
+	docker-compose up -d
+
+## Stop services with docker-compose
+.PHONY: docker-down
+docker-down:
+	docker-compose down
+
+## View docker-compose logs
+.PHONY: docker-compose-logs
+docker-compose-logs:
+	docker-compose logs -f
+
+## Build and push Docker image to registry
+.PHONY: docker-push
+docker-push: docker-build
+	docker tag medical-text-classifier:latest ${DOCKER_REGISTRY}/medical-text-classifier:latest
+	docker push ${DOCKER_REGISTRY}/medical-text-classifier:latest
+
+#################################################################################
+# CI/CD COMMANDS                                                                #
+#################################################################################
+
+## Run CI pipeline locally
+.PHONY: ci
+ci: clean lint test-all
+
+## Run pre-commit checks
+.PHONY: pre-commit
+pre-commit: format lint test-unit
+
+## Deploy to staging
+.PHONY: deploy-staging
+deploy-staging:
+	@echo "Deploying to staging environment..."
+	# Add deployment commands here
+
+## Deploy to production
+.PHONY: deploy-production
+deploy-production:
+	@echo "Deploying to production environment..."
+	# Add deployment commands here
 
 #################################################################################
 # Self Documenting Commands                                                     #

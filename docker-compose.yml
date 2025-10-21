@@ -14,25 +14,51 @@ services:
     networks:
       - mednet
 
-  minio:
-    image: minio/minio:latest
-    container_name: med_minio
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin123
-    command: server /data --console-address ":9001"
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: med_prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
     ports:
-      - "9000:9000"      # S3 API
-      - "9001:9001"      # MinIO web console
+      - "9090:9090"
     volumes:
-      - miniodata:/data
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus_data:/prometheus
     restart: unless-stopped
     networks:
       - mednet
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: med_grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3001:3000"      # Using 3001 to avoid conflict with React frontend
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    restart: unless-stopped
+    networks:
+      - mednet
+    depends_on:
+      - prometheus
 
 networks:
   mednet:
 
 volumes:
   pgdata:
-  miniodata:
+  prometheus_data:
+  grafana_data:

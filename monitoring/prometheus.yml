@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  # FastAPI Application Metrics
+  - job_name: 'medical-text-api'
+    static_configs:
+      - targets: ['host.docker.internal:8001']  # Prometheus metrics server
+    scrape_interval: 5s
+    metrics_path: /metrics
+    
+  # FastAPI Application Health
+  - job_name: 'medical-text-api-health'
+    static_configs:
+      - targets: ['host.docker.internal:8000']  # Main API server
+    scrape_interval: 30s
+    metrics_path: /health
+    
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+    
+  # PostgreSQL Metrics (if postgres_exporter is added)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres_exporter:9187']
+    scrape_interval: 15s
+    
+  # MinIO Metrics (if minio metrics are enabled)
+  - job_name: 'minio'
+    static_configs:
+      - targets: ['minio:9000']
+    scrape_interval: 15s
+    metrics_path: /minio/v2/metrics/cluster
