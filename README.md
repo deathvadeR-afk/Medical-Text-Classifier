@@ -201,25 +201,6 @@ open htmlcov/index.html
 
 ## 🚢 Deployment
 
-### ⚡ Quick Deploy to Vercel (Frontend + Serverless API)
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy with automated script
-python scripts/deploy_vercel.py
-
-# Or deploy manually
-vercel --prod
-```
-
-**Features:**
-- ✅ Frontend deployed as static site
-- ✅ API as serverless functions
-- ✅ Automatic HTTPS and CDN
-- ✅ Zero-config deployment
-
 ### 🎯 Deploy to Render (Full-Stack - Recommended)
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/YOUR_USERNAME/Medical-Text-Classification)
@@ -329,7 +310,6 @@ See [CI/CD Documentation](docs/CI_CD.md) for complete setup guide.
 
 ### 🚀 Deployment Options
 - [☁️ Render Deployment](docs/RENDER_DEPLOYMENT.md) - **Recommended** for full-stack deployment
-- [⚡ Vercel Deployment](docs/VERCEL_DEPLOYMENT.md) - **New!** Frontend + Serverless API
 - [🐳 Docker Deployment](docker-compose.yml) - Local containerized deployment
 - [☸️ Kubernetes Deployment](k8s/) - Cloud-native orchestration
 
