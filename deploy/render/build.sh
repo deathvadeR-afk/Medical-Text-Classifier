@@ -10,11 +10,17 @@ echo "📦 Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# Install additional dependencies for MinIO
+echo "📦 Installing MinIO dependencies..."
+pip install minio
+
 # Download models if not present (for first deployment)
 echo "🤖 Checking for ML models..."
-if [ ! -f "models/model.pt" ]; then
-    echo "⚠️  Models not found. Please ensure models are included in your repository."
-    echo "   You can download them from your training environment or use git-lfs."
+if [ ! -f "models/biomedbert_model/model.pt" ]; then
+    echo "📥 Downloading ML models from MinIO..."
+    python deploy/render/download_model.py
+else
+    echo "✅ ML models already present"
 fi
 
 # Run any database migrations if needed

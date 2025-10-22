@@ -38,16 +38,16 @@ REQUEST_COUNT = Counter('http_requests_total', 'Total HTTP requests', ['method',
 REQUEST_DURATION = Histogram('http_request_duration_seconds', 'HTTP request duration')
 PREDICTION_COUNT = Counter('predictions_total', 'Total predictions made', ['predicted_class'])
 PREDICTION_DURATION = Histogram('prediction_duration_seconds', 'Prediction duration')
-MODEL_LOADED = Gauge('model_loaded', 'Whether the ML model is loaded (1=loaded, 0=not loaded)')
-DATABASE_CONNECTED = Gauge('database_connected', 'Whether database is connected (1=connected, 0=not connected)')
+MODEL_LOADED = Gauge('model_loaded_status', 'Whether the ML model is loaded (1=loaded, 0=not loaded)')
+DATABASE_CONNECTED = Gauge('database_connection_status', 'Whether database is connected (1=connected, 0=not connected)')
 HEALTH_CHECK_COUNT = Counter('health_checks_total', 'Total health check requests', ['status'])
-PREDICTION_CONFIDENCE = Histogram('prediction_confidence', 'Confidence scores of predictions', buckets=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99, 1.0])
+PREDICTION_CONFIDENCE = Histogram('prediction_confidence_scores', 'Confidence scores of predictions', buckets=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99, 1.0])
 
 # Security metrics
 RATE_LIMIT_VIOLATIONS = Counter('rate_limit_violations_total', 'Total rate limit violations', ['client_ip'])
 SECURITY_EVENTS = Counter('security_events_total', 'Total security events', ['event_type'])
-API_KEY_FAILURES = Counter('api_key_failures_total', 'Total API key authentication failures')
-INVALID_INPUTS = Counter('invalid_inputs_total', 'Total invalid input attempts', ['input_type'])
+API_KEY_FAILURES = Counter('api_key_authentication_failures', 'Total API key authentication failures')
+INVALID_INPUTS = Counter('invalid_input_attempts', 'Total invalid input attempts', ['input_type'])
 
 
 @asynccontextmanager

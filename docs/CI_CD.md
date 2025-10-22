@@ -2,374 +2,103 @@
 
 ## Overview
 
-This project uses GitHub Actions for continuous integration and continuous deployment (CI/CD). The pipeline includes automated testing, Docker image building, security scanning, and deployment to multiple platforms.
+This document explains the simplified CI/CD pipeline for the Medical Text Classification application. The pipeline consolidates all functionality from the previous four separate workflows into a single, more maintainable workflow.
 
-## Pipeline Architecture
+## Pipeline Structure
 
-```
-┌─────────────────┐
-│  Code Push/PR   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Test Pipeline  │
-│  - Lint         │
-│  - Type Check   │
-│  - Unit Tests   │
-│  - Integration  │
-│  - E2E Tests    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Docker Build    │
-│  - Build Image  │
-│  - Security Scan│
-│  - Push to Reg  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Deployment    │
-│  - Frontend     │
-│  - Backend API  │
-│  - Smoke Tests  │
-└─────────────────┘
-```
+The simplified pipeline consists of a single workflow file: [.github/workflows/ci-cd.yml](../.github/workflows/ci-cd.yml)
 
-## Workflows
+### Jobs
 
-### 1. Test Workflow (`.github/workflows/test.yml`)
+1. **test-and-quality** - Code quality checks and testing
+2. **build-and-scan** - Docker image building and security scanning
+3. **test-image** - Docker image validation
+4. **deploy** - Application deployment
 
-**Triggers:**
-- Push to `main` or `develop` branches
-- Pull requests to `main` or `develop`
+## Workflow Details
 
-**Jobs:**
+### 1. Test and Quality (`test-and-quality`)
 
-#### a. Unit & Integration Tests
-- **Matrix Testing:** Python 3.8, 3.9, 3.10, 3.11
-- **Services:** PostgreSQL 13
-- **Steps:**
-  1. Checkout code
-  2. Set up Python environment
-  3. Cache pip dependencies
-  4. Install dependencies
-  5. Run linting (flake8)
-  6. Run type checking (mypy)
-  7. Run security checks (bandit)
-  8. Run unit tests with coverage
-  9. Run integration tests with coverage
-  10. Upload coverage to Codecov
-  11. Upload test results as artifacts
+This job combines all testing and code quality checks:
 
-#### b. End-to-End Tests
-- **Runs:** Only on push to `main`
-- **Services:** PostgreSQL 13
-- **Steps:**
-  1. Set up Python and Node.js
-  2. Install backend and frontend dependencies
-  3. Build frontend
-  4. Start API server
-  5. Start frontend server
-  6. Run E2E tests
-  7. Upload test results
+- **Matrix Testing**: Runs on Python versions 3.9 and 3.11
+- **Code Quality Checks**:
+  - Python linting with Ruff and Flake8
+  - Code formatting with Black and isort
+  - Type checking with MyPy
+  - Security scanning with Bandit
+- **Testing**:
+  - Unit tests
+  - Integration tests
+  - Coverage reporting to Codecov
 
-#### c. Performance Tests
-- **Runs:** Only on push to `main`
-- **Steps:**
-  1. Set up Python environment
-  2. Install dependencies
-  3. Run performance benchmarks
-  4. Upload results
+### 2. Build and Scan (`build-and-scan`)
 
-### 2. Docker Build Workflow (`.github/workflows/docker-build.yml`)
+This job handles Docker image building and security scanning:
 
-**Triggers:**
-- Push to `main` or `develop` branches
-- Tags matching `v*`
-- Pull requests to `main`
-- Manual workflow dispatch
+- **Docker Build**: Multi-stage build using Buildx
+- **Image Push**: Pushes to GitHub Container Registry (GHCR)
+- **Security Scan**: Vulnerability scanning with Trivy
+- **Metadata**: Automated tagging based on Git references
 
-**Jobs:**
+### 3. Test Image (`test-image`)
 
-#### a. Build and Push
-- **Steps:**
-  1. Checkout repository
-  2. Set up Docker Buildx
-  3. Log in to GitHub Container Registry
-  4. Extract metadata (tags, labels)
-  5. Build and push multi-platform image (amd64, arm64)
-  6. Run Trivy vulnerability scanner
-  7. Upload security results to GitHub Security
+This job validates the built Docker image:
 
-**Image Tags:**
-- `latest` - Latest commit on main branch
-- `develop` - Latest commit on develop branch
-- `v1.2.3` - Semantic version tags
-- `sha-abc123` - Commit SHA tags
+- **Image Pull**: Pulls the built image from GHCR
+- **Container Run**: Starts the container with test configuration
+- **Health Checks**: Validates container health endpoints
+- **API Testing**: Tests key API endpoints
+- **Logs**: Captures container logs for debugging
 
-#### b. Test Image
-- **Runs:** After successful build (not on PRs)
-- **Steps:**
-  1. Pull built Docker image
-  2. Run container with test database
-  3. Test API endpoints (health, docs, predict)
-  4. Check container logs
-  5. Clean up
+### 4. Deploy (`deploy`)
 
-### 3. Deployment Workflow (`.github/workflows/deploy.yml`)
+This job handles application deployment:
 
-**Triggers:**
-- Push to `main` branch
-- Tags matching `v*`
-- Manual workflow dispatch with environment selection
+- **Platform Support**: Google Cloud Run, AWS ECS, Kubernetes
+- **Environment**: Staging/Production deployment
+- **Smoke Tests**: Validates deployment health
+- **Notifications**: Slack notifications on deployment status
 
-**Jobs:**
+## Triggers
 
-#### a. Deploy Frontend
-- **Platform:** Netlify
-- **Steps:**
-  1. Checkout code
-  2. Set up Node.js
-  3. Install dependencies
-  4. Build frontend with production API URL
-  5. Deploy to Netlify
-  6. Enable PR comments and commit comments
+The pipeline is triggered by:
 
-**Required Secrets:**
-- `NETLIFY_AUTH_TOKEN`
-- `NETLIFY_SITE_ID`
-- `API_URL` (optional, defaults to localhost)
-
-#### b. Deploy Backend
-- **Platforms:** Google Cloud Run, AWS ECS, or Kubernetes
-- **Environment:** Staging or Production (manual selection)
-- **Steps:**
-  1. Checkout code
-  2. Log in to container registry
-  3. Determine image tag
-  4. Deploy to selected platform
-  5. Run smoke tests
-  6. Notify deployment status (Slack)
-
-**Deployment Options:**
-
-**Google Cloud Run:**
-```yaml
-Required Secrets:
-- GCP_PROJECT_ID
-- GCP_SA_KEY
-- DATABASE_URL
-- MLFLOW_TRACKING_URI
-- MINIO_ENDPOINT
-- MINIO_ACCESS_KEY
-- MINIO_SECRET_KEY
-```
-
-**AWS ECS:**
-```yaml
-Required Secrets:
-- AWS_ACCOUNT_ID
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
-```
-
-**Kubernetes:**
-```yaml
-Required Secrets:
-- KUBE_CONFIG (base64 encoded)
-```
-
-#### c. Rollback
-- **Runs:** On deployment failure
-- **Steps:**
-  1. Execute rollback logic
-  2. Notify team via Slack
-
-## Local Development
-
-### Running Tests Locally
-
-```bash
-# Run all tests
-make test-all
-
-# Run unit tests only
-make test-unit
-
-# Run integration tests only
-make test-integration
-
-# Run with coverage report
-python run_tests.py --all --coverage --html
-```
-
-### Docker Commands
-
-```bash
-# Build Docker image
-make docker-build
-
-# Run Docker container
-make docker-run
-
-# View logs
-make docker-logs
-
-# Stop container
-make docker-stop
-
-# Start all services (PostgreSQL, MinIO)
-make docker-up
-
-# Stop all services
-make docker-down
-```
-
-### Pre-commit Checks
-
-```bash
-# Run all pre-commit checks
-make pre-commit
-
-# This runs:
-# - Code formatting (ruff)
-# - Linting (ruff)
-# - Unit tests
-```
-
-### CI Pipeline Locally
-
-```bash
-# Run full CI pipeline
-make ci
-
-# This runs:
-# - Clean compiled files
-# - Linting
-# - All tests with coverage
-```
+- **Push** to `main` and `develop` branches
+- **Pull Requests** to `main` and `develop` branches
+- **Tags** matching pattern `v*`
+- **Manual Dispatch** via GitHub Actions UI
 
 ## Environment Variables
 
-### Required for CI/CD
+Key environment variables used in the pipeline:
 
-**GitHub Secrets:**
-- `GITHUB_TOKEN` - Automatically provided by GitHub Actions
-- `CODECOV_TOKEN` - For uploading coverage reports (optional)
+- `REGISTRY`: Container registry (GHCR)
+- `IMAGE_NAME`: Repository name for Docker images
 
-**Deployment Secrets:**
-- `NETLIFY_AUTH_TOKEN` - Netlify authentication
-- `NETLIFY_SITE_ID` - Netlify site identifier
-- `GCP_PROJECT_ID` - Google Cloud project ID
-- `GCP_SA_KEY` - Google Cloud service account key
-- `DATABASE_URL` - Production database connection string
-- `MLFLOW_TRACKING_URI` - MLflow tracking server URL
-- `MINIO_ENDPOINT` - MinIO endpoint URL
-- `MINIO_ACCESS_KEY` - MinIO access key
-- `MINIO_SECRET_KEY` - MinIO secret key
-- `SLACK_WEBHOOK` - Slack webhook for notifications
+## Secrets
 
-### Required for Local Development
+Required secrets for full functionality:
 
-```bash
-# Database
-DATABASE_URL=postgresql://meduser:medpass123@localhost:5432/medical_db
+- `GCP_SA_KEY`: Google Cloud service account key for Cloud Run deployment
+- `DATABASE_URL`: Database connection string
+- `SLACK_WEBHOOK`: Slack webhook URL for notifications
 
-# MLflow
-MLFLOW_TRACKING_URI=http://localhost:5000
+## Benefits of Simplification
 
-# MinIO
-MINIO_ENDPOINT=localhost:9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin123
+1. **Reduced Complexity**: Single workflow file instead of four separate files
+2. **Improved Maintainability**: Easier to understand and modify
+3. **Better Performance**: Reduced duplication of steps
+4. **Clearer Dependencies**: Explicit job dependencies make the flow obvious
+5. **Faster Execution**: Eliminates redundant setup steps
 
-# Testing
-TESTING=1
-LOG_LEVEL=WARNING
-```
+## Migration from Previous Pipeline
 
-## Monitoring and Notifications
+If you were using the previous four-workflow system:
 
-### Coverage Reports
-- Uploaded to Codecov after each test run
-- Available in PR comments
-- Viewable at: `https://codecov.io/gh/{username}/{repo}`
+1. **Tests** → Integrated into `test-and-quality`
+2. **Code Quality** → Integrated into `test-and-quality`
+3. **Docker Build** → `build-and-scan` job
+4. **Deploy** → `deploy` job
 
-### Security Scanning
-- Trivy scans Docker images for vulnerabilities
-- Results uploaded to GitHub Security tab
-- Critical vulnerabilities fail the build
-
-### Deployment Notifications
-- Slack notifications on deployment success/failure
-- PR comments for Netlify deployments
-- GitHub deployment status updates
-
-## Best Practices
-
-1. **Always run tests locally before pushing:**
-   ```bash
-   make pre-commit
-   ```
-
-2. **Use semantic versioning for releases:**
-   ```bash
-   git tag -a v1.2.3 -m "Release version 1.2.3"
-   git push origin v1.2.3
-   ```
-
-3. **Review security scan results:**
-   - Check GitHub Security tab regularly
-   - Address critical vulnerabilities immediately
-
-4. **Monitor deployment status:**
-   - Check Slack notifications
-   - Verify smoke tests pass
-   - Monitor application logs
-
-5. **Use feature branches:**
-   ```bash
-   git checkout -b feature/new-feature
-   # Make changes
-   git push origin feature/new-feature
-   # Create PR to develop
-   ```
-
-## Troubleshooting
-
-### Tests Failing in CI but Passing Locally
-- Check Python version compatibility
-- Verify environment variables are set correctly
-- Check for race conditions in tests
-- Review CI logs for specific errors
-
-### Docker Build Failures
-- Check Dockerfile syntax
-- Verify all required files are included
-- Check .dockerignore is not excluding needed files
-- Review build logs for specific errors
-
-### Deployment Failures
-- Verify all required secrets are set
-- Check deployment platform status
-- Review deployment logs
-- Verify database connectivity
-- Check resource limits
-
-### Coverage Drops
-- Identify uncovered code in Codecov report
-- Add tests for new features
-- Remove dead code
-- Update test fixtures
-
-## Additional Resources
-
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Docker Documentation](https://docs.docker.com/)
-- [Netlify Documentation](https://docs.netlify.com/)
-- [Google Cloud Run Documentation](https://cloud.google.com/run/docs)
-- [Pytest Documentation](https://docs.pytest.org/)
-
+All functionality has been preserved while reducing complexity.

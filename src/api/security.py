@@ -72,7 +72,7 @@ class SecurityConfig:
     def _load_allowed_hosts(self) -> List[str]:
         """Load allowed hosts from environment."""
         is_testing = os.getenv('TESTING', 'false').lower() == 'true'
-        default_hosts = "localhost,127.0.0.1,testserver" if is_testing else "localhost,127.0.0.1"
+        default_hosts = "localhost,127.0.0.1,testserver,host.docker.internal" if is_testing else "localhost,127.0.0.1,host.docker.internal"
         hosts_str = os.getenv("ALLOWED_HOSTS", default_hosts)
         return [host.strip() for host in hosts_str.split(",") if host.strip()]
 

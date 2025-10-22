@@ -1,7 +1,6 @@
 # Medical Text Classifier App
 
-[![Tests](https://github.com/{username}/{repo}/workflows/Tests/badge.svg)](https://github.com/{username}/{repo}/actions/workflows/test.yml)
-[![Docker Build](https://github.com/{username}/{repo}/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/{username}/{repo}/actions/workflows/docker-build.yml)
+[![CI/CD](https://github.com/{username}/{repo}/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/{username}/{repo}/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/gh/{username}/{repo}/branch/main/graph/badge.svg)](https://codecov.io/gh/{username}/{repo})
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -266,32 +265,36 @@ See deployment guides:
 
 ## 🔄 CI/CD
 
-The project uses GitHub Actions for continuous integration and deployment:
+The project uses GitHub Actions for continuous integration and deployment with a simplified pipeline:
 
-### Workflows
+### Workflow
 
-1. **Tests** - Runs on every push and PR
-   - Linting and type checking
-   - Unit and integration tests
-   - E2E tests (main branch only)
-   - Coverage reporting
+The simplified CI/CD pipeline consolidates all functionality into a single workflow file [ci-cd.yml](.github/workflows/ci-cd.yml):
 
-2. **Docker Build** - Builds and pushes Docker images
-   - Multi-platform builds (amd64, arm64)
+1. **Test and Quality** - Runs on every push and PR
+   - Code quality checks (linting, formatting, type checking)
+   - Security scanning with Bandit
+   - Unit and integration tests with coverage reporting
+   - Matrix testing across Python versions
+
+2. **Build and Scan** - Builds and pushes Docker images
+   - Docker image building with Buildx
    - Security scanning with Trivy
    - Automated tagging
 
-3. **Deploy** - Deploys to staging/production
-   - Frontend deployment to Netlify
+3. **Test Image** - Validates Docker image functionality
+   - Container health checks
+   - API endpoint testing
+   - Smoke tests
+
+4. **Deploy** - Deploys to staging/production
    - Backend deployment to Cloud Run/ECS/K8s
    - Smoke tests
-   - Rollback on failure
+   - Deployment notifications
 
 ### Setting Up CI/CD
 
 1. **Configure GitHub Secrets**:
-   - `NETLIFY_AUTH_TOKEN`
-   - `NETLIFY_SITE_ID`
    - `GCP_SA_KEY` (for Google Cloud)
    - `DATABASE_URL`
    - `SLACK_WEBHOOK` (optional)
