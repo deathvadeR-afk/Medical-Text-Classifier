@@ -1,13 +1,12 @@
 """
 FastAPI application for medical text classification with comprehensive security.
 """
-import os
 import logging
 import time
 from contextlib import asynccontextmanager
-from typing import Dict, Any
+from datetime import datetime
 
-from fastapi import FastAPI, HTTPException, Depends, Request, Security
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
@@ -15,16 +14,16 @@ from prometheus_client import start_http_server
 import uvicorn
 
 from src.api.models import PredictionRequest, PredictionResponse, HealthResponse, ErrorResponse
-from src.api.inference import get_classifier, MedicalTextClassifier
+from src.api.inference import get_classifier
 from src.api.security import (
     security_config, verify_api_key_header, validate_text_input,
-    log_security_event, get_current_user
+    get_current_user
 )
 from src.api.middleware import (
     RateLimitMiddleware, SecurityHeadersMiddleware, RequestLoggingMiddleware,
     TrustedHostMiddleware, InputSanitizationMiddleware
 )
-from src.db import SessionLocal, engine
+from src.db import SessionLocal
 
 # Configure logging
 logging.basicConfig(
@@ -272,7 +271,9 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content=ErrorResponse(
             error="Internal server error",
-            detail=str(exc)
+            detail=str(exc),
+            timestamp=datetime.now().isoformat(),
+            request_id=None
         ).dict()
     )
 

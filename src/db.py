@@ -2,7 +2,6 @@ from sqlalchemy import (
     create_engine, Column, Integer, String, Text, DateTime, func
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
-from datetime import datetime
 import os
 import logging
 

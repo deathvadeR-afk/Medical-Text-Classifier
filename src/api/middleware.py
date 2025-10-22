@@ -3,10 +3,10 @@ Security middleware for the Medical Text Classification API.
 """
 import time
 from collections import defaultdict
-from typing import Dict, Tuple
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
+from typing import Dict, List, Optional
 
-from fastapi import Request, Response, HTTPException
+from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 import logging
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Rate limiting middleware to prevent abuse."""
     
-    def __init__(self, app, requests_per_window: int = None, window_seconds: int = None):
+    def __init__(self, app, requests_per_window: Optional[int] = None, window_seconds: Optional[int] = None):
         super().__init__(app)
         self.requests_per_window = requests_per_window or security_config.RATE_LIMIT_REQUESTS
         self.window_seconds = window_seconds or security_config.RATE_LIMIT_WINDOW
@@ -190,7 +190,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 class TrustedHostMiddleware(BaseHTTPMiddleware):
     """Middleware to validate Host header against allowed hosts."""
     
-    def __init__(self, app, allowed_hosts: list = None):
+    def __init__(self, app, allowed_hosts: Optional[List[str]] = None):
         super().__init__(app)
         self.allowed_hosts = allowed_hosts or security_config.ALLOWED_HOSTS
     

@@ -1,18 +1,19 @@
 """
 Model inference utilities for medical text classification.
 """
-import os
-import logging
 import json
+import logging
+import os
+import re
+from pathlib import Path
+from typing import Dict, Optional, Tuple
+
+import certifi
+import numpy as np
+import ssl
 import torch
 import torch.nn as nn
-import numpy as np
-import re
-from typing import Dict, Tuple, Optional
-from transformers import AutoTokenizer, AutoModel
-from pathlib import Path
-import ssl
-import certifi
+from transformers import AutoModel, AutoTokenizer
 
 logger = logging.getLogger(__name__)
 

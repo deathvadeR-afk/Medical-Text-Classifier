@@ -5,9 +5,8 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict, Any
-from functools import wraps
 
-from fastapi import HTTPException, Security, Depends, Request
+from fastapi import HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
