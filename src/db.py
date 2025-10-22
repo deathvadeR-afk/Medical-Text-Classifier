@@ -1,9 +1,9 @@
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Text, DateTime, func
+    Column, DateTime, Integer, String, Text, create_engine, func
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
-import os
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 

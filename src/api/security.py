@@ -1,17 +1,17 @@
 """
 Security configuration and utilities for the Medical Text Classification API.
 """
+import logging
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +124,7 @@ def verify_token(token: str) -> Optional[TokenData]:
     """Verify and decode a JWT token."""
     try:
         payload = jwt.decode(token, security_config.SECRET_KEY, algorithms=[security_config.ALGORITHM])
-        username: str = payload.get("sub")
+        username = payload.get("sub")
         if username is None:
             return None
         return TokenData(username=username)
