@@ -85,11 +85,11 @@ jobs:
     # Testing
     - name: Run unit tests
       run: |
-        python run_tests.py --unit --coverage
+        python -m pytest tests/unit --cov=src --cov-report=xml --cov-report=html
 
     - name: Run integration tests
       run: |
-        python run_tests.py --integration --coverage
+        python -m pytest tests/integration --cov=src --cov-report=xml --cov-report=html
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -107,7 +107,6 @@ jobs:
         path: |
           htmlcov/
           coverage.xml
-          bandit-report.json
 
   # Docker Build and Security Scan
   build-and-scan:
