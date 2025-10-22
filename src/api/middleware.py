@@ -1,17 +1,17 @@
 """
 Security middleware for the Medical Text Classification API.
 """
+import logging
 import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
-from fastapi import Request, HTTPException
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-import logging
 
-from src.api.security import security_config, log_security_event
+from src.api.security import log_security_event, security_config
 
 logger = logging.getLogger(__name__)
 

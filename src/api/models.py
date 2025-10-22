@@ -2,8 +2,9 @@
 Pydantic models for API request/response schemas with enhanced validation.
 """
 import re
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class PredictionRequest(BaseModel):
@@ -43,7 +44,7 @@ class PredictionRequest(BaseModel):
 
         for pattern in suspicious_patterns:
             if re.search(pattern, v, re.IGNORECASE):
-                raise ValueError(f"Text contains potentially malicious content")
+                raise ValueError("Text contains potentially malicious content")
 
         # Check for excessive special characters (potential injection)
         special_char_ratio = sum(1 for c in v if not c.isalnum() and not c.isspace()) / len(v)

@@ -6,22 +6,26 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
-from prometheus_client import start_http_server
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest, start_http_server
 import uvicorn
 
-from src.api.models import PredictionRequest, PredictionResponse, HealthResponse, ErrorResponse
 from src.api.inference import get_classifier
-from src.api.security import (
-    security_config, verify_api_key_header, validate_text_input,
-    get_current_user
-)
 from src.api.middleware import (
-    RateLimitMiddleware, SecurityHeadersMiddleware, RequestLoggingMiddleware,
-    TrustedHostMiddleware, InputSanitizationMiddleware
+    InputSanitizationMiddleware,
+    RateLimitMiddleware,
+    RequestLoggingMiddleware,
+    SecurityHeadersMiddleware,
+    TrustedHostMiddleware
+)
+from src.api.models import ErrorResponse, HealthResponse, PredictionRequest, PredictionResponse
+from src.api.security import (
+    get_current_user,
+    security_config,
+    validate_text_input,
+    verify_api_key_header
 )
 from src.db import SessionLocal
 

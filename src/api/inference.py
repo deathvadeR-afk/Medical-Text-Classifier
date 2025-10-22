@@ -5,12 +5,10 @@ import json
 import logging
 import os
 import re
+import ssl
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-import certifi
-import numpy as np
-import ssl
 import torch
 import torch.nn as nn
 from transformers import AutoModel, AutoTokenizer
@@ -100,12 +98,16 @@ class MedicalTextClassifier:
                     if path.exists() and (path / "model.pt").exists():
                         model_path = path
                         break
+            else:
+                model_path = Path(model_dir)
+                if not (model_path.exists() and (model_path / "model.pt").exists()):
+                    model_path = None
 
-                if model_path is None:
-                    # Instead of raising an error, we'll set _loaded to False to use rule-based classification
-                    logger.info("Model not found, using rule-based classification as fallback")
-                    self._loaded = False
-                    return
+            if model_path is None:
+                # Instead of raising an error, we'll set _loaded to False to use rule-based classification
+                logger.info("Model not found, using rule-based classification as fallback")
+                self._loaded = False
+                return
 
             model_path = Path(model_path)
             logger.info(f"Loading model from: {model_path}")
