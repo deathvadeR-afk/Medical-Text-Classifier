@@ -30,6 +30,8 @@ End-to-end medical text classification app built with open-source production too
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 
+- Link to fine-tuned Biomed BERT model (https://drive.google.com/file/d/1obgzof33fehbGQWbFZJEwYzgGvrkCaHb/view?usp=sharing)
+
 ## 🏃 Quick Start
 
 ### Prerequisites
