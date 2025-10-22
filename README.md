@@ -45,8 +45,8 @@ End-to-end medical text classification app built with open-source production too
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/{username}/{repo}.git
-   cd {repo}
+   git clone https://github.com/deathvadeR-afk/Medical-Text-Classifier.git
+   cd Medical-Text-Classifier
    ```
 
 2. **Set up Python environment**
