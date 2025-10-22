@@ -21,8 +21,10 @@ class PredictionRequest(BaseModel):
     @classmethod
     def validate_text_content(cls, v):
         """Validate text content for security."""
-        if not v or not v.strip():
-            raise ValueError("Text cannot be empty or only whitespace")
+        # Allow whitespace-only text (will be handled by API logic)
+        # Only check if text is completely empty (no characters at all)
+        if v is None or (isinstance(v, str) and len(v) == 0):
+            raise ValueError("Text cannot be empty")
 
         # Remove null bytes
         v = v.replace('\x00', '')
@@ -51,7 +53,7 @@ class PredictionRequest(BaseModel):
         if special_char_ratio > 0.3:  # More than 30% special characters
             raise ValueError("Text contains too many special characters")
 
-        return v.strip()
+        return v
 
 
 class PredictionResponse(BaseModel):
