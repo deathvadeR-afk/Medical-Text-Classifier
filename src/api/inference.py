@@ -118,8 +118,10 @@ class MedicalTextClassifier:
                     model_path = None
 
             if model_path is None:
-                # Raise FileNotFoundError to match test expectations
-                raise FileNotFoundError("Model files not found")
+                # Instead of raising an exception, set _loaded to False to use rule-based classification
+                logger.info("Model not found, using rule-based classification as fallback")
+                self._loaded = False
+                return
 
             model_path = Path(model_path)
             logger.info(f"Loading model from: {model_path}")
@@ -187,8 +189,9 @@ class MedicalTextClassifier:
 
         except Exception as e:
             logger.error(f"❌ Error loading model: {e}")
-            # Re-raise the exception to match test expectations
-            raise
+            # Instead of re-raising the exception, set _loaded to False to use rule-based classification
+            logger.info("Using rule-based classification as fallback due to model loading error")
+            self._loaded = False
 
     def preprocess_text(self, text: str) -> str:
         """
