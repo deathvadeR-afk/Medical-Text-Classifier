@@ -1,6 +1,6 @@
 # 📚 Medical Text Classification - Documentation Hub
 
-Welcome to the comprehensive documentation for the Medical Text Classification application. This hub provides access to all documentation needed to understand, deploy, and maintain the system.
+Welcome to the comprehensive documentation for the Medical Text Classification application. This hub provides access to all documentation needed to understand and work with the system locally.
 
 ## 🎯 Quick Navigation
 
@@ -25,16 +25,13 @@ Welcome to the comprehensive documentation for the Medical Text Classification a
 - [**Health Checks**](MONITORING.md#health-checks) - System health monitoring
 - [**Troubleshooting**](TROUBLESHOOTING.md) - Common issues and solutions
 
-### 🚢 Deployment
-- [**Render Deployment**](RENDER_DEPLOYMENT.md) - Deploy to Render.com (Recommended)
-- [**Docker Deployment**](DOCKER.md) - Containerized deployment
-- [**Kubernetes Deployment**](../k8s/README.md) - Cloud-native deployment
-- [**Production Checklist**](PRODUCTION_CHECKLIST.md) - Pre-deployment verification
+### 🚢 Local Development
+- [**Docker Guide**](DOCKER.md) - Containerized local development
+- [**Development Environment**](INSTALLATION.md#development-setup) - Setting up your local environment
 
-### 🔄 CI/CD
+### 🔄 Development Workflow
 - [**CI/CD Pipeline**](CI_CD.md) - GitHub Actions workflows
 - [**Automated Testing**](CI_CD.md#testing) - Continuous testing setup
-- [**Deployment Automation**](CI_CD.md#deployment) - Automated deployments
 
 ## 📋 Documentation Structure
 
@@ -49,9 +46,7 @@ docs/
 ├── SECURITY.md                  # Security implementation guide
 ├── MONITORING.md                # Monitoring and observability
 ├── TROUBLESHOOTING.md           # Common issues and solutions
-├── RENDER_DEPLOYMENT.md         # Render.com deployment guide
-├── DOCKER.md                    # Docker deployment guide
-├── PRODUCTION_CHECKLIST.md      # Production readiness checklist
+├── DOCKER.md                    # Docker development guide
 ├── CI_CD.md                     # CI/CD pipeline documentation
 ├── PERFORMANCE.md               # Performance optimization guide
 ├── MAINTENANCE.md               # Ongoing maintenance procedures
@@ -68,9 +63,9 @@ make dev             # Start development environment
 make test            # Run all tests
 make lint            # Run code quality checks
 
-# Production
-make build           # Build production images
-make deploy          # Deploy to production
+# Local Development
+make build           # Build development images
+make run             # Run local development setup
 make monitor         # Open monitoring dashboard
 ```
 
@@ -82,12 +77,6 @@ make monitor         # Open monitoring dashboard
 - **Metrics**: http://localhost:8000/metrics
 - **Grafana**: http://localhost:3001
 - **Prometheus**: http://localhost:9090
-
-### Key URLs (Production)
-- **Frontend**: https://medtext-frontend.onrender.com
-- **API**: https://medtext-api.onrender.com
-- **API Docs**: https://medtext-api.onrender.com/docs
-- **Health Check**: https://medtext-api.onrender.com/health
 
 ## 🏗️ System Components
 
@@ -105,7 +94,7 @@ make monitor         # Open monitoring dashboard
 4. **Inference Engine** - Real-time prediction serving
 
 ### Security Layer
-1. **API Key Authentication** - Production access control
+1. **API Key Authentication** - Access control
 2. **Rate Limiting** - Request throttling and abuse prevention
 3. **Input Validation** - XSS and injection protection
 4. **Security Headers** - CORS, CSP, and security policies
@@ -176,6 +165,6 @@ Want to improve the documentation?
 
 ## 🎉 Welcome to Medical Text Classification!
 
-This documentation hub is your gateway to understanding and working with our production-grade medical text classification system. Whether you're a developer, operator, or user, you'll find the information you need to be successful.
+This documentation hub is your gateway to understanding and working with our medical text classification system for local development. Whether you're a developer, researcher, or enthusiast, you'll find the information you need to be successful.
 
 **Start with the [Quick Start Guide](../README.md#quick-start) and explore from there!**

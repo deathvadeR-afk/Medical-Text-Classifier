@@ -388,14 +388,6 @@ FROM python:3.12-slim as runtime
 # Ingress for external access
 ```
 
-### Cloud Architecture (Render)
-```yaml
-# Managed PostgreSQL database
-# Auto-scaling web services
-# Static site hosting
-# Built-in monitoring and logging
-```
-
 ---
 
 ## 🎯 Architecture Benefits

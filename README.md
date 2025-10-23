@@ -5,19 +5,17 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-End-to-end medical text classification app built with open-source production tooling.
+Medical text classification app for local development and testing.
 
 ## 🚀 Features
 
 - **Advanced ML Model**: Fine-tuned BiomedBERT for medical text classification (99% accuracy)
-- **Production-Ready API**: FastAPI backend with comprehensive error handling
+- **Local API**: FastAPI backend with comprehensive error handling
 - **Modern Frontend**: React + TypeScript with glassmorphism UI
 - **Database Integration**: PostgreSQL with SQLAlchemy ORM (optional)
 - **Monitoring & Observability**: Prometheus metrics and Grafana dashboards
 - **Comprehensive Testing**: Unit, integration, E2E, and performance tests
-- **CI/CD Pipeline**: Automated testing, building, and deployment
 - **Docker Support**: Containerized application with docker-compose
-- **Security**: Vulnerability scanning with Trivy
 
 ## 📋 Table of Contents
 
@@ -25,12 +23,8 @@ End-to-end medical text classification app built with open-source production too
 - [Architecture](#architecture)
 - [Development](#development)
 - [Testing](#testing)
-- [Deployment](#deployment)
-- [CI/CD](#cicd)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
-
-- Link to fine-tuned Biomed BERT model (https://drive.google.com/file/d/1obgzof33fehbGQWbFZJEwYzgGvrkCaHb/view?usp=sharing)
 
 ## 🏃 Quick Start
 
@@ -56,30 +50,41 @@ End-to-end medical text classification app built with open-source production too
    pip install -r requirements.txt
    ```
 
-3. **Start services with Docker Compose**
+3. **Download the BiomedBERT Model**
+   Download the fine-tuned BiomedBERT model from [Google Drive](https://drive.google.com/file/d/1obgzof33fehbGQWbFZJEwYzgGvrkCaHb/view?usp=sharing)
+   
+   Extract the model files and place them in the `models/` folder. The folder structure should look like:
+   ```
+   models/
+   ├── model.pt
+   ├── reverse_label_mapping.json
+   └── config.json
+   ```
+
+4. **Start services with Docker Compose**
    ```bash
    docker-compose up -d
    ```
 
-4. **Set up environment variables**
+5. **Set up environment variables**
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
-5. **Start the API server**
+6. **Start the API server**
    ```bash
    python -m uvicorn src.api.main:app --host 127.0.0.1 --port 8000 --reload
    ```
 
-6. **Start the frontend** (in a new terminal)
+7. **Start the frontend** (in a new terminal)
    ```bash
    cd frontend
    npm install
    npm start
    ```
 
-7. **Access the application**
+8. **Access the application**
    - Frontend: http://localhost:3000
    - API: http://localhost:8000
    - API Docs: http://localhost:8000/docs
@@ -106,7 +111,7 @@ End-to-end medical text classification app built with open-source production too
            │                  │                  │
            ▼                  ▼                  ▼
 ┌──────────────────┐  ┌──────────────┐  ┌──────────────┐
-│  BiomedBERT      │  │  PostgreSQL  │  │    MinIO     │
+│  BiomedBERT      │  │  PostgreSQL  │  │  MinIO     │
 │  Model           │  │  Database    │  │  (S3 Store)  │
 └──────────────────┘  └──────────────┘  └──────────────┘
 ```
@@ -117,7 +122,6 @@ End-to-end medical text classification app built with open-source production too
 
 ```
 medical-text-classifier/
-├── .github/workflows/      # CI/CD workflows
 ├── data/                   # Data files (DVC tracked)
 ├── docs/                   # Documentation
 ├── frontend/               # React frontend
@@ -176,19 +180,15 @@ The project includes comprehensive test coverage:
 
 ```bash
 # Run all tests with coverage
-python run_tests.py --all --coverage --html
+python -m pytest tests/ --cov=src --cov-report=html
 
 # Run specific test types
-python run_tests.py --unit
-python run_tests.py --integration
-python run_tests.py --e2e
-python run_tests.py --performance
+python -m pytest tests/unit/
+python -m pytest tests/integration/
+python -m pytest tests/e2e/
 
 # Run specific test file
-python run_tests.py --file tests/unit/test_models.py
-
-# Run with parallel execution
-python run_tests.py --all -n 4
+python -m pytest tests/unit/test_models.py
 ```
 
 ### Test Coverage
@@ -197,100 +197,9 @@ Current coverage: **80%+**
 
 View detailed coverage report:
 ```bash
-python run_tests.py --all --coverage --html
+python -m pytest tests/ --cov=src --cov-report=html
 open htmlcov/index.html
 ```
-
-## 🚢 Deployment
-
-### 🎯 Deploy to Render (Full-Stack - Recommended)
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/YOUR_USERNAME/Medical-Text-Classification)
-
-**One-click deployment to production:**
-
-1. **Fork this repository** to your GitHub account
-2. **Click the Deploy to Render button** above
-3. **Configure environment variables** in Render dashboard
-4. **Deploy!** 🎉
-
-**Manual Render Setup:**
-```bash
-# Prepare for deployment
-python deploy/render/deploy.py
-
-# Follow the guide
-open docs/RENDER_DEPLOYMENT.md
-```
-
-### Docker Deployment
-
-```bash
-# Build and run with Docker
-docker build -t medical-text-classifier .
-docker run -p 8000:8000 \
-  -e DATABASE_URL=postgresql://user:pass@host:5432/db \
-  medical-text-classifier
-```
-
-### Other Cloud Platforms
-
-The application also supports deployment to:
-- **Render.com** (recommended for simplicity)
-- **Google Cloud Run**
-- **AWS ECS**
-- **Kubernetes**
-
-See deployment guides:
-- [Render Deployment](docs/RENDER_DEPLOYMENT.md) - Complete Render guide
-- [Kubernetes Deployment](k8s/) - Kubernetes manifests
-- [Docker Compose](docker-compose.prod.yml) - Production Docker setup
-
-## 🔄 CI/CD
-
-The project uses GitHub Actions for continuous integration and deployment with a simplified pipeline:
-
-### Workflow
-
-The simplified CI/CD pipeline consolidates all functionality into a single workflow file [ci-cd.yml](.github/workflows/ci-cd.yml):
-
-1. **Test and Quality** - Runs on every push and PR
-   - Code quality checks (linting, formatting, type checking)
-   - Security scanning with Bandit
-   - Unit and integration tests with coverage reporting
-   - Matrix testing across Python versions
-
-2. **Build and Scan** - Builds and pushes Docker images
-   - Docker image building with Buildx
-   - Security scanning with Trivy
-   - Automated tagging
-
-3. **Test Image** - Validates Docker image functionality
-   - Container health checks
-   - API endpoint testing
-   - Smoke tests
-
-4. **Deploy** - Deploys to staging/production
-   - Backend deployment to Cloud Run/ECS/K8s
-   - Smoke tests
-   - Deployment notifications
-
-### Setting Up CI/CD
-
-1. **Configure GitHub Secrets**:
-   - `GCP_SA_KEY` (for Google Cloud)
-   - `DATABASE_URL`
-   - `SLACK_WEBHOOK` (optional)
-
-2. **Enable GitHub Actions**:
-   - Go to repository Settings → Actions
-   - Enable workflows
-
-3. **Configure Codecov** (optional):
-   - Sign up at codecov.io
-   - Add `CODECOV_TOKEN` to secrets
-
-See [CI/CD Documentation](docs/CI_CD.md) for complete setup guide.
 
 ## 📚 Documentation
 
@@ -305,15 +214,9 @@ See [CI/CD Documentation](docs/CI_CD.md) for complete setup guide.
 - [🧪 Testing Guide](docs/TESTING.md) - Comprehensive testing strategy
 - [🔧 Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
-### 🛡️ Security & Production
+### 🛡️ Local Development
 - [🔒 Security Guide](docs/SECURITY.md) - Security features and configuration
-- [✅ Production Checklist](docs/PRODUCTION_CHECKLIST.md) - Pre-deployment verification
 - [📊 Monitoring Guide](docs/MONITORING.md) - Observability and alerting setup
-
-### 🚀 Deployment Options
-- [☁️ Render Deployment](docs/RENDER_DEPLOYMENT.md) - **Recommended** for full-stack deployment
-- [🐳 Docker Deployment](docker-compose.yml) - Local containerized deployment
-- [☸️ Kubernetes Deployment](k8s/) - Cloud-native orchestration
 
 ### 🔗 Quick Links
 - [🌐 Interactive API Docs](http://localhost:8000/docs) - Swagger UI (when running locally)

@@ -135,12 +135,6 @@ docker-down:
 docker-compose-logs:
 	docker-compose logs -f
 
-## Build and push Docker image to registry
-.PHONY: docker-push
-docker-push: docker-build
-	docker tag medical-text-classifier:latest ${DOCKER_REGISTRY}/medical-text-classifier:latest
-	docker push ${DOCKER_REGISTRY}/medical-text-classifier:latest
-
 #################################################################################
 # CI/CD COMMANDS                                                                #
 #################################################################################
@@ -152,18 +146,6 @@ ci: clean lint test-all
 ## Run pre-commit checks
 .PHONY: pre-commit
 pre-commit: format lint test-unit
-
-## Deploy to staging
-.PHONY: deploy-staging
-deploy-staging:
-	@echo "Deploying to staging environment..."
-	# Add deployment commands here
-
-## Deploy to production
-.PHONY: deploy-production
-deploy-production:
-	@echo "Deploying to production environment..."
-	# Add deployment commands here
 
 #################################################################################
 # Self Documenting Commands                                                     #
