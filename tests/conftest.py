@@ -199,3 +199,4 @@ def pytest_configure(config):
 # Environment setup for tests
 os.environ["TESTING"] = "1"
 os.environ["LOG_LEVEL"] = "WARNING"
+os.environ["ALLOWED_ORIGINS"] = "http://localhost:3000,http://localhost:3001,*"

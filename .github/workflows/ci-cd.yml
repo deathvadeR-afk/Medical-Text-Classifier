@@ -65,7 +65,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-test.txt
-        pip install flake8 black isort mypy bandit ruff
 
     - name: Set up environment variables
       run: |
@@ -74,22 +73,10 @@ jobs:
         echo "LOG_LEVEL=WARNING" >> $GITHUB_ENV
         echo "MODEL_PATH=models" >> $GITHUB_ENV
 
-    - name: Create mock model for testing
+    - name: Setup test environment and run tests
       run: |
-        mkdir -p models
-        echo '{"0": "Neurological & Cognitive Disorders", "1": "Cancers", "2": "Cardiovascular Diseases", "3": "Metabolic & Endocrine Disorders", "4": "Other Age-Related & Immune Disorders"}' > models/reverse_label_mapping.json
-        echo '{"Neurological & Cognitive Disorders": 0, "Cancers": 1, "Cardiovascular Diseases": 2, "Metabolic & Endocrine Disorders": 3, "Other Age-Related & Immune Disorders": 4}' > models/label_mapping.json
-
-    # Code Quality Checks - SKIPPED as requested
-
-    # Testing
-    - name: Run unit tests
-      run: |
-        python -m pytest tests/unit --cov=src --cov-report=xml --cov-report=html
-
-    - name: Run integration tests
-      run: |
-        python -m pytest tests/integration --cov=src --cov-report=xml --cov-report=html
+        # Use the run_tests.py script to setup and run tests
+        python run_tests.py --all --coverage --html
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
