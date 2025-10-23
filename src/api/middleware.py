@@ -2,6 +2,7 @@
 Security middleware for the Medical Text Classification API.
 """
 import logging
+import os
 import time
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -53,7 +54,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Skip rate limiting completely in test environment
-        import os
         if os.getenv('TESTING', 'false').lower() in ['true', '1']:
             return await call_next(request)
 
@@ -97,6 +97,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         
         if security_config.ENABLE_SECURITY_HEADERS:
+            # Store existing CORS headers to preserve them
+            existing_cors_headers = {}
+            for header_name in ["access-control-allow-origin", "access-control-allow-methods", 
+                               "access-control-allow-headers", "access-control-expose-headers",
+                               "access-control-allow-credentials"]:
+                if header_name in response.headers:
+                    existing_cors_headers[header_name] = response.headers[header_name]
+            
             # Prevent clickjacking
             response.headers["X-Frame-Options"] = "DENY"
             
@@ -134,6 +142,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "gyroscope=(), "
                 "speaker=()"
             )
+            
+            # Restore CORS headers
+            for header_name, header_value in existing_cors_headers.items():
+                response.headers[header_name] = header_value
         
         return response
 
@@ -196,12 +208,11 @@ class TrustedHostMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next):
         """Validate Host header."""
-        if "*" in self.allowed_hosts:
+        # Skip host validation for OPTIONS requests and in test environment
+        if request.method == "OPTIONS" or os.getenv('TESTING', 'false').lower() in ['true', '1']:
             return await call_next(request)
 
-        # Skip host validation in test environment
-        import os
-        if os.getenv('TESTING', 'false').lower() in ['true', '1']:
+        if "*" in self.allowed_hosts:
             return await call_next(request)
 
         host = request.headers.get("host", "").split(":")[0]  # Remove port
