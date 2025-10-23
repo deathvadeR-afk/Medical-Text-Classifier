@@ -59,11 +59,11 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Medical Text Classification API...")
     
-    # Load model
+    # Load model with fallback behavior for production
     try:
         classifier = get_classifier()
-        classifier.load_model()
-        logger.info("Model loaded successfully")
+        classifier.load_model(raise_on_error=False)
+        logger.info("Model loading completed")
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
         # Continue without model for health checks
