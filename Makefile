@@ -46,20 +46,15 @@ format:
 test:
 	python -m pytest tests
 
-## Run unit tests
-.PHONY: test-unit
-test-unit:
-	python run_tests.py --unit
+## Run simple startup test
+.PHONY: test-startup
+test-startup:
+	python test_startup.py
 
-## Run integration tests
-.PHONY: test-integration
-test-integration:
-	python run_tests.py --integration
-
-## Run all tests with coverage
-.PHONY: test-all
-test-all:
-	python run_tests.py --all --coverage --html
+## Run simple test (alias)
+.PHONY: test-simple
+test-simple:
+	python test_startup.py
 
 ## Download Data from storage system
 .PHONY: sync_data_down

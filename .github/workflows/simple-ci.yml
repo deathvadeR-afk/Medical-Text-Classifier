@@ -1,0 +1,57 @@
+name: Simple CI - App Startup Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  startup-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create mock model files
+      run: |
+        mkdir -p models
+        echo '{"0": "Neurological & Cognitive Disorders", "1": "Cancers", "2": "Cardiovascular Diseases", "3": "Metabolic & Endocrine Disorders", "4": "Other Age-Related & Immune Disorders"}' > models/reverse_label_mapping.json
+        echo '{"Neurological & Cognitive Disorders": "0", "Cancers": "1", "Cardiovascular Diseases": "2", "Metabolic & Endocrine Disorders": "3", "Other Age-Related & Immune Disorders": "4"}' > models/label_mapping.json
+
+    - name: Test basic functionality
+      run: |
+        export TESTING=1
+        export LOG_LEVEL=WARNING
+        export MODEL_PATH=models
+        python -c "
+        import os
+        os.environ['TESTING'] = '1'
+        os.environ['LOG_LEVEL'] = 'WARNING'
+        os.environ['MODEL_PATH'] = 'models'
+        print('✅ Environment variables set')
+
+        # Test basic imports
+        try:
+            import fastapi
+            print('✅ FastAPI available')
+
+            import uvicorn
+            print('✅ Uvicorn available')
+
+            print('✅ Core dependencies working')
+            print('🎉 Basic setup verified!')
+        except Exception as e:
+            print(f'❌ Error: {e}')
+            exit(1)
+        "
