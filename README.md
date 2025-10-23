@@ -33,7 +33,7 @@ Medical text classification app for local development and testing.
 - Python 3.8+
 - Node.js 18+
 - Docker and Docker Compose
-- PostgreSQL 13+
+- PostgreSQL 13+ (optional)
 
 ### Installation
 
